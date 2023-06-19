@@ -1,4 +1,5 @@
-from flask import Flask, request, send_file, jsonify
+from flask import Flask, request, jsonify, send_file
+from io import BytesIO
 import pytube
 from pytube.exceptions import RegexMatchError
 
@@ -22,12 +23,21 @@ def save_video():
         return 'Invalid request parameters', 400
 
     try:
-        # Create a YouTube object
         youtube = pytube.YouTube(video_url)
         stream = youtube.streams.get_highest_resolution() if format_type == 'video' \
             else youtube.streams.get_audio_only()
-        file_path = stream.download()
-        return send_file(file_path, as_attachment=True)
+
+        # Download to a buffer
+        buffer = BytesIO()
+        stream.stream_to_buffer(buffer)
+        buffer.seek(0)
+
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=youtube.title,
+            mimetype="video/mp4",
+        )
     except RegexMatchError:
         return 'Video not found', 404
     except Exception as e:
