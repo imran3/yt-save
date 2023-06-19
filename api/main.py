@@ -21,7 +21,7 @@ def save_video():
     format_type = request.args.get('format')
 
     if not video_url or not format_type or format_type not in ['video', 'audio']:
-        return 'Invalid request parameters', 400
+        return jsonify({'error': 'Invalid request parameters, missing `video` and/or `format` inputs.'}), 400
 
     try:
         youtube = pytube.YouTube(video_url)
@@ -43,9 +43,9 @@ def save_video():
             mimetype="video/mp4",
         )
     except RegexMatchError:
-        return 'Video not found', 404
+        return jsonify({'error': 'Video not found'}), 404
     except Exception as e:
-        return str(e), 500
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/info', methods=['GET'])
@@ -53,7 +53,7 @@ def get_video_metadata():
     video_url = request.args.get('url')
 
     if not video_url:
-        return 'Missing video URL', 400
+        return jsonify({'error': 'Missing video URL'}), 400
 
     try:
         youtube = pytube.YouTube(video_url)
@@ -84,7 +84,7 @@ def get_video_metadata():
         video_metadata['streams'] = stream_options
         return jsonify(video_metadata)
     except Exception as e:
-        return str(e), 500
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == "__main__":
