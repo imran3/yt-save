@@ -10,6 +10,7 @@ packages = [{include = "yt_save", from = "src"}]
 python = "^3.10"
 pytube = "^15.0.0"
 flask = "^2.3.2"
+gunicorn = "^20.1.0"
 
 
 [build-system]

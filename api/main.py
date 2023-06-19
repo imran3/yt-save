@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_file
 from io import BytesIO
 import pytube
 from pytube.exceptions import RegexMatchError
+import os
 
 app = Flask(__name__)
 
@@ -87,4 +88,5 @@ def get_video_metadata():
 
 
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
