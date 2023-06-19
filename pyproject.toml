@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "yt-save"
+version = "0.1.0"
+description = ""
+authors = ["imran3"]
+readme = "README.md"
+packages = [{include = "yt_save", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pytube = "^15.0.0"
+flask = "^2.3.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
