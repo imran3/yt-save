@@ -3,8 +3,11 @@ from io import BytesIO
 import os
 import pytube
 from pytube.exceptions import RegexMatchError
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
+
 
 # /save?video-url=<VIDEO_URL>&format=<FORMAT>
 @app.route('/save', methods=['GET'])
