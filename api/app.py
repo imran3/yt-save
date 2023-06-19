@@ -32,10 +32,13 @@ def save_video():
         stream.stream_to_buffer(buffer)
         buffer.seek(0)
 
+        filename = f'{youtube.title}.mp4' if format_type == 'video'\
+            else f'{youtube.title}.mp3'
+
         return send_file(
             buffer,
             as_attachment=True,
-            download_name=youtube.title,
+            download_name=filename,
             mimetype="video/mp4",
         )
     except RegexMatchError:
