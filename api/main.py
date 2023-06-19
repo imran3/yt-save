@@ -1,16 +1,10 @@
 from flask import Flask, request, jsonify, send_file
 from io import BytesIO
+import os
 import pytube
 from pytube.exceptions import RegexMatchError
-import os
 
 app = Flask(__name__)
-
-
-@app.route("/")
-def helloworld():
-    return "Hello there, to save a video try this endpoint: /save?url=<VIDEO_URL>&format=<[audio, video]>"
-
 
 # /save?video-url=<VIDEO_URL>&format=<FORMAT>
 @app.route('/save', methods=['GET'])
@@ -85,7 +79,6 @@ def get_video_metadata():
         return jsonify(video_metadata)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
