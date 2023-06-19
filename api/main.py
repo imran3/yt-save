@@ -6,7 +6,7 @@ from pytube.exceptions import RegexMatchError
 from flask_cors import CORS
 
 app = Flask(__name__)
-cors = CORS(app, resources={'*': {'origins': ['http://localhost:3000/', 'https://ytsave.vercel.app/']}})
+cors = CORS(app, origins=['http://localhost:3000', 'https://ytsave.vercel.app'])
 
 
 # /save?video-url=<VIDEO_URL>&format=<FORMAT>
