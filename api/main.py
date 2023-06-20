@@ -66,8 +66,10 @@ def get_video_metadata():
 
         # Get all available streams
         streams = youtube.streams
+        filtered_streams = [stream for stream in streams if stream.mime_type == "video/mp4" or stream.mime_type == "audio/mp4"]
+
         stream_options = []
-        for stream in streams:
+        for stream in filtered_streams:
             stream_info = {
                 'resolution': stream.resolution,
                 'mime_type': stream.mime_type,
