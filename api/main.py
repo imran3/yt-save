@@ -5,40 +5,53 @@ import pytube
 from pytube.exceptions import RegexMatchError
 from flask_cors import CORS
 
+from api.helpers import download_stream_via_buffer
+
 app = Flask(__name__)
 cors = CORS(app, origins=['http://localhost:3000', 'https://ytsave.vercel.app'])
 
 
-# /save?video-url=<VIDEO_URL>&format=<FORMAT>
-@app.route('/save', methods=['GET'])
-def save_video():
+@app.route('/save_hd', methods=['GET'])
+def save_video_hd():
     print("Request params:", request.args)
 
     video_url = request.args.get('url')
     format_type = request.args.get('format')
 
     if not video_url or not format_type or format_type not in ['video', 'audio']:
-        return jsonify({'error': 'Invalid request parameters, missing `video` and/or `format` inputs.'}), 400
+        return jsonify({'error': 'Bad request: missing `video` and/or `format` inputs.'}), 400
 
     try:
         youtube = pytube.YouTube(video_url)
         stream = youtube.streams.get_highest_resolution() if format_type == 'video' \
             else youtube.streams.get_audio_only()
 
-        # Download to a buffer
-        buffer = BytesIO()
-        stream.stream_to_buffer(buffer)
-        buffer.seek(0)
+        return download_stream_via_buffer(stream, youtube.title)
+    except RegexMatchError:
+        return jsonify({'error': 'Video not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-        filename = f'{youtube.title}.mp4' if format_type == 'video'\
-            else f'{youtube.title}.mp3'
 
-        return send_file(
-            buffer,
-            as_attachment=True,
-            download_name=filename,
-            mimetype="video/mp4",
-        )
+@app.route('/save', methods=['GET'])
+def save_video_by_itag():
+    print("Request params:", request.args)
+
+    video_url = request.args.get('url')
+    itag = int(request.args.get('itag'))
+
+    print(video_url, itag)
+    if not video_url or not itag:
+        return jsonify({'error': 'Bad request, missing `video` and/or `itag` inputs.'}), 400
+
+    try:
+        youtube = pytube.YouTube(video_url)
+        stream = youtube.streams.get_by_itag(itag)
+        if stream is None:
+            return jsonify({'error': 'Video not found, invalid url or itag'}), 404
+
+        return download_stream_via_buffer(stream, youtube.title)
+
     except RegexMatchError:
         return jsonify({'error': 'Video not found'}), 404
     except Exception as e:
@@ -50,7 +63,7 @@ def get_video_metadata():
     video_url = request.args.get('url')
 
     if not video_url:
-        return jsonify({'error': 'Missing video URL'}), 400
+        return jsonify({'error': 'Bad request: missing video URL'}), 400
 
     try:
         youtube = pytube.YouTube(video_url)
@@ -88,6 +101,7 @@ def get_video_metadata():
         return jsonify(video_metadata)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
