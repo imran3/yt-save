@@ -65,11 +65,13 @@ def get_video_metadata():
         }
 
         # Get all available streams
-        streams = youtube.streams
-        filtered_streams = [stream for stream in streams if stream.mime_type == "video/mp4" or stream.mime_type == "audio/mp4"]
+        video_streams = youtube.streams.filter(file_extension='mp4').order_by('resolution').desc()
+        audio_streams = youtube.streams.filter(only_audio=True, file_extension='mp4')
+        streams = [*video_streams, *audio_streams]
 
+        # TODO: filter list further -> one option per resolution (prefer non progressive over progressive)
         stream_options = []
-        for stream in filtered_streams:
+        for stream in streams:
             stream_info = {
                 'resolution': stream.resolution,
                 'mime_type': stream.mime_type,
@@ -77,6 +79,8 @@ def get_video_metadata():
                 'video_codec': stream.video_codec,
                 'audio_codec': stream.audio_codec,
                 'is_progressive': stream.is_progressive,
+                'itag': stream.itag,
+                'type': stream.type
             }
             stream_options.append(stream_info)
 
